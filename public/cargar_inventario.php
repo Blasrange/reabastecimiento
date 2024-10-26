@@ -24,10 +24,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
         $database = new Database();
         $inventariosObj = new inventarios($database, $_SESSION['cliente_id']);
 
-        // Preparar inserciones
+        // Preparar inserciones o actualizaciones
         foreach ($data as $key => $row) {
-            if ($key > 0) {
-                // Asegúrate de validar y limpiar los datos
+            if ($key > 0) { // Ignorar la primera fila (encabezados)
+                // Validar y limpiar los datos
                 $codigo = $row[0] ?? '';
                 $lpn = $row[1] ?? '';
                 $localizacion = $row[2] ?? '';
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
                 $sku = $row[4] ?? '';
                 $sku2 = $row[5] ?? '';
                 $descripcion = $row[6] ?? '';
-                $precio = !empty($row[7]) ? floatval(str_replace(',', '.', $row[7])) : 0; // Cambiar coma por punto
+                $precio = !empty($row[7]) ? floatval(str_replace(',', '.', $row[7])) : 0;
                 $tipo_material = $row[8] ?? '';
                 $categoria_material = $row[9] ?? '';
                 $unidades = !empty($row[10]) ? intval($row[10]) : 0;
@@ -45,26 +45,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
                 $udm = $row[14] ?? '';
                 $embalaje = $row[15] ?? '';
 
-                // Manejar las fechas correctamente
-                $fecha_entrada = !empty($row[16]) ? \DateTime::createFromFormat('d/m/Y', $row[16]) : false;
-                $fecha_entrada = $fecha_entrada ? $fecha_entrada->format('Y-m-d') : null;
-
+                // Manejar fechas
+                $fecha_entrada = !empty($row[16]) ? \DateTime::createFromFormat('d/m/Y', $row[16])->format('Y-m-d') : null;
                 $estado = $row[17] ?? '';
                 $lote = $row[18] ?? '';
-
-                $fecha_fabricacion = !empty($row[19]) ? \DateTime::createFromFormat('d/m/Y', $row[19]) : false;
-                $fecha_fabricacion = $fecha_fabricacion ? $fecha_fabricacion->format('Y-m-d') : null;
-
-                $fecha_vencimiento = !empty($row[20]) ? \DateTime::createFromFormat('d/m/Y', $row[20]) : false;
-                $fecha_vencimiento = $fecha_vencimiento ? $fecha_vencimiento->format('Y-m-d') : null;
-
+                $fecha_fabricacion = !empty($row[19]) ? \DateTime::createFromFormat('d/m/Y', $row[19])->format('Y-m-d') : null;
+                $fecha_vencimiento = !empty($row[20]) ? \DateTime::createFromFormat('d/m/Y', $row[20])->format('Y-m-d') : null;
                 $fpc = !empty($row[21]) ? intval($row[21]) : 0;
                 $peso = !empty($row[22]) ? floatval(str_replace(',', '.', $row[22])) : 0;
                 $serial = $row[23] ?? '';
-                $cliente_id = !empty($row[24]) ? intval($row[24]) : null;
+                $cliente_id = $_SESSION['cliente_id'];
 
-                // Insertar datos en la base de datos
-                $inventariosObj->addItem([
+                // Utilizar updateOrInsertInventory para insertar o actualizar
+                $inventariosObj->updateOrInsertInventory([
                     'codigo' => $codigo,
                     'lpn' => $lpn,
                     'localizacion' => $localizacion,
@@ -92,10 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
                     'cliente_id' => $cliente_id,
                 ]);
             }
-
-            $_SESSION['success_message'] = 'Inventario cargado correctamente.';
         }
 
+        $_SESSION['success_message'] = 'Inventario cargado correctamente.';
     } catch (Exception $e) {
         $_SESSION['error_message'] = 'Error al cargar el inventario: ' . $e->getMessage();
     }
