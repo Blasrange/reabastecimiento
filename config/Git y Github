@@ -73,7 +73,7 @@ Para futuros cambios y subir los registros a github ejecutar:
 git add .
 git commit -m "nuevo commit"
 git push
-
+git push principal
 git push --set-upstream origin master
 
 
