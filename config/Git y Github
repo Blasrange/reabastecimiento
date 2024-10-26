@@ -74,6 +74,9 @@ git add .
 git commit -m "nuevo commit"
 git push
 
+git push --set-upstream origin master
+
+
 # Clonar repositorio
 Para descargar un repositorio completo basta con tomar la url ej: https://github.com/Blasrange/reabastecimiento.git y ejecutar el siguiente comando en alguna carpeta de su computadora.
 git clone https://github.com/Blasrange/reabastecimiento.git nombreCarpeta
